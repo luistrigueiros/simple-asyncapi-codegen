@@ -1,0 +1,35 @@
+plugins {
+    id "com.github.node-gradle.node"
+}
+
+/**
+    npx -p @asyncapi/cli asyncapi generate fromTemplate ./simple-asyncapi.yml @asyncapi/nodejs-template -p server=production -o test/nodejs-template-output
+    npx -p @asyncapi/cli asyncapi generate fromTemplate ./member-asyncapi.yml @asyncapi/java-template -p server=production -o test/member-output
+ */
+tasks.register("asyncApiCodeGen1", NpxTask) {
+    group = "other"
+    description = "First simple async api code generation "
+    doFirst {
+        println("""
+            This will run the npx code generation command
+            https://www.asyncapi.com/docs/tools/generator/usage#cli-usage-with-npx-instead-of-npm
+            npx -p @asyncapi/cli asyncapi generate fromTemplate ./asyncapi.yaml @asyncapi/html-template
+        """)
+    }
+    command = '@asyncapi/cli@2.9.0'
+    args = [ 'asyncapi', 'generate', 'fromTemplate', 'src/main/resources/simple-asyncapi.yml', '@asyncapi/java-template', '-p', 'server=production', '-o',  'member-output' ]
+}
+
+tasks.register("asyncApiCodeSimpleExample", NodeTask) {
+    //dependsOn = [ 'npmInstall' ]
+    group = "other"
+    description = "Generate code for simple-asyncapi.yml"
+    script = file('src/main/node/simple-asyncapi.js')
+}
+
+tasks.register("asyncApiCodeMemberExample", NodeTask) {
+    //dependsOn = [ 'npmInstall' ]
+    group = "other"
+    description = "Generate code for member.asyncapi.yaml"
+    script = file('src/main/node/member-asyncapi.js')
+}

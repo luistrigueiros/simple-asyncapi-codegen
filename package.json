@@ -1,0 +1,9 @@
+{
+  "name": "example",
+  "version": "0.0.0",
+  "dependencies": {
+    "@asyncapi/generator": "1.17.25",
+    "example": "file:",
+    "figlet": "^1.2.0"
+  }
+}

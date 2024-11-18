@@ -1,0 +1,335 @@
+asyncapi: 3.0.0
+info:
+  title: Member API
+  version: 1.0.1
+  description: 'API for managing members, their channels, and roles'
+servers:
+  production:
+    host: prod.url:9092
+    protocol: kafka
+    description: Kafka PRODUCTION cluster
+    bindings:
+      kafka:
+        schemaRegistryUrl: https://schema-registry.prod.url/
+
+channels:
+  mep.member.inbound:
+    address: mep.member.inbound
+    messages:
+      subscribe.message.MemberEvent:
+        $ref: '#/components/messages/MemberEvent'
+      subscribe.message.ChannelEvent:
+        $ref: '#/components/messages/ChannelEvent'
+      subscribe.message.RoleEvent:
+        $ref: '#/components/messages/RoleEvent'
+      subscribe.message.ClearStateEvent:
+        $ref: '#/components/messages/ClearStateEvent'
+      subscribe.message.PublishRequestEvent:
+        $ref: '#/components/messages/PublishRequestEvent'
+  mep.member.outbound:
+    address: mep.member.outbound
+    messages:
+      publish.message.MemberEvent:
+        $ref: '#/components/messages/MemberEvent'
+      publish.message.ChannelEvent:
+        $ref: '#/components/messages/ChannelEvent'
+      publish.message.RoleEvent:
+        $ref: '#/components/messages/RoleEvent'
+
+operations:
+  mep.member.inbound:
+    action: receive
+    channel:
+      $ref: '#/channels/mep.member.inbound'
+    messages:
+      - $ref: '#/channels/mep.member.inbound/messages/subscribe.message.MemberEvent'
+      - $ref: '#/channels/mep.member.inbound/messages/subscribe.message.ChannelEvent'
+      - $ref: '#/channels/mep.member.inbound/messages/subscribe.message.RoleEvent'
+      - $ref: '#/channels/mep.member.inbound/messages/subscribe.message.ClearStateEvent'
+      - $ref: '#/channels/mep.member.inbound/messages/subscribe.message.PublishRequestEvent'
+  member.events.outbound.publish:
+    action: send
+    channel:
+      $ref: '#/channels/mep.member.outbound'
+    messages:
+      - $ref: '#/channels/mep.member.outbound/messages/publish.message.MemberEvent'
+      - $ref: '#/channels/mep.member.outbound/messages/publish.message.ChannelEvent'
+      - $ref: '#/channels/mep.member.outbound/messages/publish.message.RoleEvent'
+
+components:
+  messages:
+    MemberEvent:
+      headers:
+        $ref: '#/components/schemas/BaseMetadata'
+      payload:
+        $ref: '#/components/schemas/Member'
+    ChannelEvent:
+      headers:
+        $ref: '#/components/schemas/MemberMetadata'
+      payload:
+        type: array
+        items:
+          $ref: '#/components/schemas/Channel'
+    RoleEvent:
+      headers:
+        $ref: '#/components/schemas/MemberMetadata'
+      payload:
+        type: array
+        items:
+          $ref: '#/components/schemas/Role'
+    ClearStateEvent:
+      headers:
+        $ref: '#/components/schemas/MemberMetadata'
+      payload:
+        $ref: '#/components/schemas/ClearStateEvent'
+    PublishRequestEvent:
+      headers:
+        $ref: '#/components/schemas/BaseMetadata'
+      payload:
+        type: array
+        items:
+          $ref: '#/components/schemas/PublishEvent'
+
+
+  schemas:
+    BaseMetadata:
+      type: object
+      properties:
+        source:
+          type: string
+        changeDatetime:  # inbound only
+          type: string
+          format: date-time
+        generateEventInd: # inbound only
+          type: boolean
+    MemberMetadata:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/BaseMetadata'
+        - type: object
+          properties:
+            memberUuid:
+              type: string
+              format: uuid
+    Member:
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+            - insert
+            - update
+            - delete
+            - refresh
+        memberUuid:
+          type: string
+          format: uuid
+        memberRef:
+          type: string
+        titleCode:
+          type: string
+        titleText:
+          type: string
+        firstName:
+          type: string
+        middleName:
+          type: string
+        surname:
+          type: string
+        activePostalAddress:
+          $ref: '#/components/schemas/PostalAddress'
+        activeHomePhone:
+          $ref: '#/components/schemas/Phone'
+        activeWorkPhone:
+          $ref: '#/components/schemas/Phone'
+        activeMobilePhone:
+          $ref: '#/components/schemas/Phone'
+        activeEmailAddress:
+          type: string
+          format: idn-email
+        dateOfBirth:
+          type: string
+          format: date
+        dateOfDeath:
+          type: string
+          format: date
+        dateOfAdoption:
+          type: string
+          format: date
+        genderCode:
+          type: string
+        genderText:
+          type: string
+        memberType:
+          type: string
+        nationalId:
+          type: string
+        countryOfResidenceCode:
+          type: string
+        countryOfResidenceText:
+          type: string
+        countryOfTaxationCode:
+          type: string
+        countryOfTaxationText:
+          type: string
+        notificationTypeCode:
+          type: string
+        notificationTypeText:
+          type: string
+        marketingPostInd:
+          type: boolean
+        marketingEmailInd:
+          type: boolean
+        marketingPhoneInd:
+          type: boolean
+        marketingSmsInd:
+          type: boolean
+        onlineRegInd:
+          type: boolean
+        prospectInd:
+          type: boolean
+        giosPartnerId:
+          type: integer
+        versionDatetime:   # outbound only
+          type: string
+          format: date-time
+        versionHash:
+          type: string
+
+    Channel:
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+            - insert
+            - update
+            - delete
+            - refresh
+        channelUuid:
+          type: string
+          format: uuid
+        channelType:
+          type: string
+        channelDetail:
+          type: string
+        countryCode:
+          type: string
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        addressLine3:
+          type: string
+        addressLine4:
+          type: string
+        addressLine5:
+          type: string
+        postcode:
+          type: string
+        verifiedInd:
+          type: string
+        defaultContactInd:
+          type: string
+        defaultCorrespondenceInd:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        giosChannelNo:
+          type: integer
+        versionDatetime: # outbound event
+          type: string
+          format: date-time
+        versionHash:
+          type: string
+
+    Role:
+      type: object
+      properties:
+        operation:
+          type: string
+          enum:
+            - insert
+            - update
+            - delete
+            - refresh
+        objectType:
+          type: string
+        objectUuid:
+          type: string
+          format: uuid
+        objectRef:
+          type: string
+        roleType:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        versionDatetime:
+          type: string
+          format: date-time
+        versionHash:
+          type: string
+
+    PublishEvent:
+      type: object
+      properties:
+        objectType:  # move up to header
+          enum:
+            - member
+            - contact
+            - role
+            - all
+        memberUuid:
+          type: string
+          format: uuid
+
+    ClearStateEvent:
+      type: object
+      properties:
+        versionHash:
+          type: string
+
+    PostalAddress:
+      type: object
+      properties:
+        addressLine1:
+          type: string
+        addressLine2:
+          type: string
+        addressLine3:
+          type: string
+        addressLine4:
+          type: string
+        addressLine5:
+          type: string
+        postcode:
+          type: string
+        countryCode:
+          type: string
+        countryText:
+          type: string
+
+    Phone:
+      type: object
+      properties:
+        countryCode:
+          type: string
+        countryText:
+          type: string
+        callingCode:
+          type: string
+        number:
+          type: string
+
+
+  # Scheduled event producer, should it be callable from REST Apis? Via an Event? Does it need a new outbound event which accounts for diffs?
+  # How does this differ from forced DeReg?
+  # Should all result from Member Event

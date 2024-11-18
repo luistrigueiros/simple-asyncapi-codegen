@@ -1,0 +1,21 @@
+plugins {
+    id 'java'
+    id 'asyncapi-codegen-using-npx'
+    id 'asyncapi-codegen-using-asyncapi-gradle-plugin'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform('org.junit:junit-bom:5.10.0')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+}
+
+test {
+    useJUnitPlatform()
+}
